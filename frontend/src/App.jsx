@@ -95,35 +95,35 @@ export default function App() {
       </header>
 
       {/* Main Content Layout */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 flex flex-col justify-start">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-6 py-6 md:py-8 flex flex-col justify-start">
         
         {/* Conditional View Rendering */}
         {view === "upload" && (
-          <div className="max-w-xl mx-auto w-full py-8">
+          <div className="max-w-xl mx-auto w-full py-4 md:py-8">
             <UploadPanel onUploadSuccess={handleUploadSuccess} />
           </div>
         )}
 
         {view === "pipeline" && (
-          <div className="max-w-md mx-auto w-full py-12">
+          <div className="max-w-md mx-auto w-full py-8 md:py-12">
             <PipelineProgress jobId={jobId} onComplete={handlePipelineComplete} />
           </div>
         )}
 
         {view === "results" && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="flex items-center justify-between border-b border-[#2e2e2e] pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#2e2e2e] pb-4 gap-4">
               <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <Layers className="text-zinc-400 w-4 h-4" />
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Layers className="text-zinc-400 w-5 h-5" />
                   Candidate Pipeline
                 </h2>
-                <p className="text-xs text-zinc-500 mt-1">
+                <p className="text-sm text-zinc-500 mt-1">
                   Drag, drop, and move candidates between columns to update status in MongoDB.
                 </p>
               </div>
 
-              <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-zinc-900 border border-[#2e2e2e] text-zinc-400 rounded-lg flex items-center gap-1.5">
+              <span className="self-start sm:self-center text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-zinc-900 border border-[#2e2e2e] text-zinc-400 rounded-lg flex items-center gap-1.5">
                 <Sparkles className="w-3 h-3 text-zinc-400" />
                 Pipeline Evaluated
               </span>

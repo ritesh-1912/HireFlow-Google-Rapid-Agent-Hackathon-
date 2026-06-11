@@ -115,121 +115,142 @@ export default function UploadPanel({ onUploadSuccess }) {
   };
 
   return (
-    <div className="bg-[#161616] border border-[#2e2e2e] rounded-xl p-6 shadow-md transition-all duration-300">
-      <h2 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-        <FileText className="text-zinc-400 w-5 h-5" />
-        Configure Campaign
-      </h2>
+    <div className="space-y-6">
+      {/* Prominent App Title and Tagline */}
+      <div className="text-center py-4">
+        <h1 className="text-4xl font-extrabold tracking-tight text-white mb-2">
+          HireFlow
+        </h1>
+        <p className="text-zinc-400 text-sm font-medium">
+          Screen candidates in seconds, not days.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-            Job Description *
-          </label>
-          <textarea
-            value={jdText}
-            onChange={(e) => setJdText(e.target.value)}
-            placeholder="Paste job description requirements..."
-            required
-            className="w-full h-36 bg-[#0a0a0a] border border-[#2e2e2e] focus:border-zinc-500 rounded-lg px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none transition-all resize-none"
-          />
-        </div>
+      <div className="bg-[#161616] border border-[#2e2e2e] rounded-xl p-6 shadow-md transition-all duration-300">
+        <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
+          <FileText className="text-zinc-400 w-5 h-5" />
+          Configure Campaign
+        </h2>
 
-        <div>
-          <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-            Resumes (PDF only) *
-          </label>
-          
-          <div
-            onDragEnter={handleDrag}
-            onDragOver={handleDrag}
-            onDragLeave={handleDrag}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-            className={`border border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center ${
-              dragActive
-                ? "border-zinc-400 bg-zinc-900/50"
-                : "border-[#2e2e2e] bg-[#0a0a0a] hover:border-zinc-650"
-            }`}
-          >
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              multiple
-              accept=".pdf"
-              className="hidden"
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-sm font-bold text-zinc-400 uppercase tracking-wider mb-2">
+              Job Description *
+            </label>
+            <textarea
+              value={jdText}
+              onChange={(e) => setJdText(e.target.value)}
+              placeholder="Paste job description requirements..."
+              required
+              className="w-full h-36 bg-[#0a0a0a] border border-[#2e2e2e] focus:border-zinc-500 rounded-lg px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-650 focus:outline-none transition-all resize-none"
             />
-            
-            <Upload className="w-5 h-5 text-zinc-500 mb-2" />
-            <p className="text-xs text-zinc-300">
-              Drag & drop PDFs or <span className="text-white underline font-medium">browse</span>
-            </p>
           </div>
-        </div>
 
-        {/* Selected Files List */}
-        {files.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <h3 className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                Files ({files.length})
-              </h3>
+          <div>
+            <label className="block text-sm font-bold text-zinc-400 uppercase tracking-wider mb-2">
+              Resumes (PDF only) *
+            </label>
+            
+            <div
+              onDragEnter={handleDrag}
+              onDragOver={handleDrag}
+              onDragLeave={handleDrag}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`border border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center ${
+                dragActive
+                  ? "border-zinc-400 bg-zinc-900/50"
+                  : "border-[#2e2e2e] bg-[#0a0a0a] hover:border-zinc-650"
+              }`}
+            >
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                multiple
+                accept=".pdf"
+                className="hidden"
+              />
+              
+              <Upload className="w-5 h-5 text-zinc-500 mb-2" />
+              <p className="text-sm text-zinc-350">
+                Drag & drop PDFs or <span className="text-white underline font-semibold">browse</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Selected Files List */}
+          {files.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  Files ({files.length})
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setFiles([])}
+                  className="text-xs text-zinc-400 hover:text-white"
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+                {files.map((file, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between bg-[#0a0a0a] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-zinc-300"
+                  >
+                    <span className="truncate pr-4">{file.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(idx)}
+                      className="text-zinc-500 hover:text-white"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Error Alert with Try Again Button */}
+          {error && (
+            <div className="flex flex-col gap-3 bg-rose-950/30 border border-rose-900/40 rounded-lg p-4 text-sm text-rose-400">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
               <button
                 type="button"
-                onClick={() => setFiles([])}
-                className="text-[10px] text-zinc-400 hover:text-white"
+                onClick={handleSubmit}
+                className="self-end px-3 py-1 bg-rose-900/50 hover:bg-rose-900 text-white rounded text-xs font-semibold transition-colors"
               >
-                Clear all
+                Try Again
               </button>
             </div>
-            <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
-              {files.map((file, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between bg-[#0a0a0a] border border-[#2e2e2e] rounded px-3 py-1.5 text-xs text-zinc-300"
-                >
-                  <span className="truncate pr-4">{file.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeFile(idx)}
-                    className="text-zinc-500 hover:text-white"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Error Alert */}
-        {error && (
-          <div className="flex items-start gap-2 bg-rose-950/30 border border-rose-900/40 rounded-lg p-3 text-xs text-rose-400">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`w-full py-2.5 px-4 rounded-lg font-semibold text-xs transition-all duration-200 flex items-center justify-center gap-2 ${
-            isLoading
-              ? "bg-[#222] text-zinc-500 cursor-not-allowed border border-[#333]"
-              : "bg-white text-black hover:bg-zinc-200 border border-white"
-          }`}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              <span>Analyzing & Uploading...</span>
-            </>
-          ) : (
-            <span>Submit Campaign</span>
           )}
-        </button>
-      </form>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
+              isLoading
+                ? "bg-[#222] text-zinc-500 cursor-not-allowed border border-[#333]"
+                : "bg-white text-black hover:bg-zinc-200 border border-white"
+            }`}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Analyzing & Uploading...</span>
+              </>
+            ) : (
+              <span>Submit Campaign</span>
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
