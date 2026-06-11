@@ -150,9 +150,10 @@ Follow these steps to demonstrate the full end-to-end capabilities of HireFlow t
    - Move/update a candidate's column status by dragging them or using the dropdown selector, updating their status dynamically in the database.
 
 ### Phase 2: Conversational Evaluation (Google ADK AI Agent)
-1. **Launch the Agent Interface**: Open [https://hireflow-agent-72571306030.us-central1.run.app](https://hireflow-agent-72571306030.us-central1.run.app).
+1. **Launch the Agent Interface**: Click the floating **"Ask HireFlow AI"** button in the bottom right corner of the React Web App. A sliding drawer will open directly on your screen containing the conversational recruiter chatbot interface.
 2. **Trigger Conversational Audit**: Chat with the agent by entering:
    - *Example Prompt*: `Analyze candidates for job ID <job_id>` (Copy the Job ID from the header of the Kanban results page in the web app).
 3. **Watch Tool Orchestration**: Observe the agent automatically invoke its ADK tools (`run_hiring_pipeline`, `get_pipeline_status`, and `get_ranked_candidates`) to analyze database profiles.
 4. **Review Suggestions**: The agent will reply with candidate rankings, hiring recommendations, strengths/weaknesses, and top 3 personalized questions.
+
 
