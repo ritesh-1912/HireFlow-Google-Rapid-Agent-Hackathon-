@@ -1,0 +1,4 @@
+google-adk>=0.1.0
+httpx
+python-dotenv
+pymupdf
