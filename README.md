@@ -130,3 +130,29 @@ PROJECT_ID="your-project-id" MONGODB_URI="your-mongo-uri" ./deploy.sh
    npm run build
    ```
 3. Deploy the resulting `frontend/dist` directory to your static hosting provider (e.g. Firebase Hosting, Cloud Storage, Vercel, or Netlify).
+
+---
+
+## 🚀 Hackathon Demo Guide (How to Test & Present)
+
+Follow these steps to demonstrate the full end-to-end capabilities of HireFlow to judges:
+
+### Phase 1: Visual Screening (React Web App)
+1. **Open the web client**: Go to [https://frontend-gold-one-34.vercel.app](https://frontend-gold-one-34.vercel.app).
+2. **Review Connection Status**: Verify the top-right indicator reads **Atlas DB: Connected** (showing live connection to MongoDB Atlas from anywhere).
+3. **Configure the Campaign**:
+   - Paste a job description (e.g., *Software Engineer requirements: React, Node.js, MongoDB*) into the **Job Description** textarea.
+   - Upload candidate resumes (PDFs) in the **Resumes** area.
+4. **Run the Stepper**: Click **Submit Campaign**. Watch the stepper trigger the 5 main stages in real-time with custom pulsing radar animations.
+5. **Explore Kanban Results**:
+   - Observe candidate cards sorted by their match scores.
+   - Click a card to expand candidate **Insights** (reasons to hire, custom interview questions) with smooth arrow rotation transitions.
+   - Move/update a candidate's column status by dragging them or using the dropdown selector, updating their status dynamically in the database.
+
+### Phase 2: Conversational Evaluation (Google ADK AI Agent)
+1. **Launch the Agent Interface**: Open [https://hireflow-agent-72571306030.us-central1.run.app](https://hireflow-agent-72571306030.us-central1.run.app).
+2. **Trigger Conversational Audit**: Chat with the agent by entering:
+   - *Example Prompt*: `Analyze candidates for job ID <job_id>` (Copy the Job ID from the header of the Kanban results page in the web app).
+3. **Watch Tool Orchestration**: Observe the agent automatically invoke its ADK tools (`run_hiring_pipeline`, `get_pipeline_status`, and `get_ranked_candidates`) to analyze database profiles.
+4. **Review Suggestions**: The agent will reply with candidate rankings, hiring recommendations, strengths/weaknesses, and top 3 personalized questions.
+
