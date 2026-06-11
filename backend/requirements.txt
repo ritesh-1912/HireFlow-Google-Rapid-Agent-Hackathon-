@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pymongo
+python-dotenv
+PyMuPDF
+google-cloud-aiplatform
+vertexai
+python-multipart
