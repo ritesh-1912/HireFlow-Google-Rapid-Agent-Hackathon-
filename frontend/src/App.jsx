@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import UploadPanel from "./components/UploadPanel";
 import PipelineProgress from "./components/PipelineProgress";
 import KanbanBoard from "./components/KanbanBoard";
-import { Layers, Database, Sparkles, RefreshCw, ArrowLeft } from "lucide-react";
+import { Layers, Database, Sparkles, RefreshCw, ArrowLeft, X } from "lucide-react";
 
 export default function App() {
   const [view, setView] = useState("upload"); // upload, pipeline, results
   const [jobId, setJobId] = useState(null);
   const [isDbConnected, setIsDbConnected] = useState(true);
+  const [isAgentOpen, setIsAgentOpen] = useState(false);
 
   const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -132,8 +133,53 @@ export default function App() {
             <KanbanBoard jobId={jobId} />
           </div>
         )}
-
       </main>
+
+      {/* Floating AI Agent Trigger Button */}
+      <button
+        onClick={() => setIsAgentOpen(true)}
+        className="fixed bottom-6 right-6 flex items-center gap-2 px-4 py-3 bg-white text-black hover:bg-zinc-200 font-bold text-sm rounded-full shadow-lg shadow-black/50 transition-all z-40 hover:scale-105"
+      >
+        <Sparkles className="w-4 h-4 text-indigo-600 animate-pulse" />
+        Ask HireFlow AI
+      </button>
+
+      {/* Slide-out AI Agent Chat Drawer */}
+      {isAgentOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          {/* Click backdrop to close */}
+          <div className="flex-1" onClick={() => setIsAgentOpen(false)} />
+          
+          <div className="w-full max-w-lg h-full bg-[#121212] border-l border-[#2e2e2e] flex flex-col shadow-2xl animate-in slide-in-from-right duration-300">
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#2e2e2e] bg-[#161616]">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-5 h-5 text-zinc-400" />
+                <div>
+                  <h2 className="text-sm font-bold text-white">HireFlow AI Agent</h2>
+                  <p className="text-[10px] text-zinc-550 uppercase tracking-widest font-semibold">Conversational Recruiter</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsAgentOpen(false)}
+                className="p-1 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Drawer Body (Iframe pointing to the deployed ADK UI) */}
+            <div className="flex-1 bg-black relative">
+              <iframe
+                src="https://hireflow-agent-72571306030.us-central1.run.app/dev-ui/"
+                title="HireFlow AI Agent Chat"
+                className="w-full h-full border-none"
+                allow="microphone; clipboard-write"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
