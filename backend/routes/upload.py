@@ -39,6 +39,7 @@ async def upload(
     job_id = save_job_description(jd_text)
     
     resume_count = 0
+    total_files = len(files)
     # Parse PDF contents and store them as initial resumes in MongoDB linked to job_id
     for file in files:
         content = await file.read()
@@ -56,8 +57,10 @@ async def upload(
             embedding=[0.0] * 768
         )
         resume_count += 1
+        print(f"Inserted resume {resume_count} of {total_files}")
         
     return {
         "job_id": job_id,
         "resume_count": resume_count
     }
+

@@ -6,13 +6,19 @@ set -e
 # Verify environment variables
 if [ -z "$PROJECT_ID" ]; then
     echo "Error: PROJECT_ID environment variable is not set."
-    echo "Usage: PROJECT_ID=my-project-id MONGODB_URI=mongodb_uri ./deploy.sh"
+    echo "Usage: PROJECT_ID=my-project-id MONGODB_URI=mongodb_uri GEMINI_API_KEY=api_key ./deploy.sh"
     exit 1
 fi
 
 if [ -z "$MONGODB_URI" ]; then
     echo "Error: MONGODB_URI environment variable is not set."
-    echo "Usage: PROJECT_ID=my-project-id MONGODB_URI=mongodb_uri ./deploy.sh"
+    echo "Usage: PROJECT_ID=my-project-id MONGODB_URI=mongodb_uri GEMINI_API_KEY=api_key ./deploy.sh"
+    exit 1
+fi
+
+if [ -z "$GEMINI_API_KEY" ]; then
+    echo "Error: GEMINI_API_KEY environment variable is not set."
+    echo "Usage: PROJECT_ID=my-project-id MONGODB_URI=mongodb_uri GEMINI_API_KEY=api_key ./deploy.sh"
     exit 1
 fi
 
@@ -28,6 +34,6 @@ gcloud run deploy hireflow-backend \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
-  --set-env-vars MONGODB_URI=$MONGODB_URI,GOOGLE_CLOUD_PROJECT=$PROJECT_ID
+  --set-env-vars MONGODB_URI=$MONGODB_URI,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GEMINI_API_KEY=$GEMINI_API_KEY
 
 echo "Deployment completed successfully!"

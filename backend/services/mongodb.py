@@ -194,3 +194,21 @@ def get_candidates() -> list[dict]:
         doc["_id"] = str(doc["_id"])
         doc.pop("embedding", None)
     return results
+
+def get_db():
+    return db
+
+def get_candidates_by_job(job_id: str):
+    db = get_db()
+    return list(db.resumes.find(
+        {"job_id": job_id}, 
+        {"_id": 0, "embedding": 0}
+    ).sort("score", -1))
+
+def update_candidate_status(job_id: str, candidate_name: str, status: str):
+    db = get_db()
+    db.resumes.update_one(
+        {"job_id": job_id, "name": candidate_name},
+        {"$set": {"status": status}}
+    )
+

@@ -105,12 +105,13 @@ async def run_pipeline(job_id: str):
         # 8. Sets status to "ranking"
         set_pipeline_status(job_id, "ranking")
 
-        # 9. Calls gemini.rank_candidates() on the top 10, gets scores, reasoning, interview_questions
-        # Filter top candidates to only include those matching this job_id
-        top_candidates = [c for c in top_candidates if c.get("job_id") == job_id]
+        # 9. Calls gemini.rank_candidates() on ALL resumes for this job_id to ensure we process everything
+        candidates_to_rank = list(resumes_collection.find({"job_id": job_id}))
+        print(f"Ranking all {len(candidates_to_rank)} resumes for job_id '{job_id}'")
 
-        if top_candidates:
-            ranked_results = rank_candidates(jd_text, top_candidates)
+        if candidates_to_rank:
+            ranked_results = rank_candidates(jd_text, candidates_to_rank)
+
 
             # 10. Updates each candidate in MongoDB with their score, reasoning, interview_questions
             for rank_item in ranked_results:

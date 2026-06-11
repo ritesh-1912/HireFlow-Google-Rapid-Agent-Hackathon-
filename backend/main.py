@@ -10,6 +10,7 @@ from services.mongodb import client, create_vector_search_index
 from routes.upload import router as upload_router
 from routes.agent import router as agent_router
 from routes.candidates import router as candidates_router
+from routes.chat import router as chat_router
 
 # Load env vars
 load_dotenv()
@@ -53,6 +54,7 @@ async def startup_event():
 app.include_router(upload_router)
 app.include_router(agent_router)
 app.include_router(candidates_router)
+app.include_router(chat_router)
 
 if __name__ == "__main__":
     import uvicorn

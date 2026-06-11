@@ -3,6 +3,7 @@ uvicorn
 pymongo
 python-dotenv
 PyMuPDF
-google-cloud-aiplatform
+google-cloud-aiplatform>=1.38.0
 vertexai
 python-multipart
+google-generativeai

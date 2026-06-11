@@ -17,8 +17,8 @@ else:
     print("Warning: GOOGLE_CLOUD_PROJECT is not set. Vertex AI initialization skipped in gemini.py.")
 
 def get_gemini_model():
-    # Utilizing gemini-2.0-flash-001 as requested
-    return GenerativeModel("gemini-2.0-flash-001")
+    # Utilizing gemini-2.0-flash as requested
+    return GenerativeModel("gemini-2.0-flash")
 
 def structure_resume(raw_text: str) -> dict:
     """
@@ -27,10 +27,10 @@ def structure_resume(raw_text: str) -> dict:
     """
     if not raw_text.strip():
         return {
-            "name": "Unknown",
+            "name": "Candidate",
             "skills": [],
             "experience_years": 0.0,
-            "education": [],
+            "education": "Not specified",
             "summary": "Empty resume content."
         }
 
@@ -46,46 +46,53 @@ def structure_resume(raw_text: str) -> dict:
         "summary": "Short professional summary"
     }}
     
-    IMPORTANT: Return ONLY a valid JSON object. Do NOT wrap the JSON in markdown code blocks (like ```json ... ```) or any other formatting. Do NOT include any explanation or additional text before or after the JSON object.
+    Return ONLY a raw JSON object. No markdown, no code fences, no explanation. Start your response with {{ and end with }}
 
     Raw Resume Text:
     {raw_text}
     """
     
+    response = None
+    parsed = {}
     try:
         response = model.generate_content(
             prompt,
             generation_config=GenerationConfig(response_mime_type="application/json")
         )
-        data = json.loads(response.text.strip())
-        # Ensure correct type for experience_years
-        if "experience_years" in data:
-            try:
-                data["experience_years"] = float(data["experience_years"])
-            except ValueError:
-                data["experience_years"] = 0.0
-        return data
+        text = response.text.strip()
+        if text.startswith("```"):
+            text = text.split("```")[1]
+            if text.startswith("json"):
+                text = text[4:]
+        text = text.strip()
+        parsed = json.loads(text)
     except Exception as e:
         print(f"Error structuring resume with Gemini: {e}")
-        # Try to clean response if it contains markdown code blocks
-        try:
-            cleaned = response.text.strip()
-            if cleaned.startswith("```json"):
-                cleaned = cleaned[7:]
-            if cleaned.endswith("```"):
-                cleaned = cleaned[:-3]
-            data = json.loads(cleaned.strip())
-            return data
-        except Exception:
-            pass
-            
-        return {
-            "name": "Unknown Candidate",
-            "skills": [],
-            "experience_years": 0.0,
-            "education": [],
-            "summary": "Could not structure resume content due to model error."
-        }
+        if response:
+            try:
+                text = response.text.strip()
+                if text.startswith("```"):
+                    text = text.split("```")[1]
+                    if text.startswith("json"):
+                        text = text[4:]
+                text = text.strip()
+                parsed = json.loads(text)
+            except Exception:
+                pass
+                
+    exp_years = parsed.get("experience_years", 0)
+    try:
+        exp_years = float(exp_years)
+    except (ValueError, TypeError):
+        exp_years = 0.0
+
+    return {
+        "name": parsed.get("name") or "Candidate",
+        "skills": parsed.get("skills") if isinstance(parsed.get("skills"), list) else [],
+        "experience_years": exp_years,
+        "education": parsed.get("education") or "Not specified",
+        "summary": parsed.get("summary") or parsed.get("raw_text") or (raw_text[:200] if raw_text else "")
+    }
 
 def rank_candidates(jd_text: str, candidates_list: list) -> list:
     """
@@ -138,28 +145,62 @@ def rank_candidates(jd_text: str, candidates_list: list) -> list:
         ...
     ]
     
-    Ensure you return ONLY a valid JSON array. Do not wrap it in markdown code blocks.
+    Return ONLY a raw JSON object. No markdown, no code fences, no explanation. Start your response with [ and end with ]
     """
     
+    response = None
+    parsed = []
     try:
         response = model.generate_content(
             prompt,
             generation_config=GenerationConfig(response_mime_type="application/json")
         )
-        data = json.loads(response.text.strip())
-        return data
+        text = response.text.strip()
+        if text.startswith("```"):
+            text = text.split("```")[1]
+            if text.startswith("json"):
+                text = text[4:]
+        text = text.strip()
+        parsed = json.loads(text)
     except Exception as e:
         print(f"Error ranking candidates with Gemini: {e}")
-        # Try cleaning formatting
+        if response:
+            try:
+                text = response.text.strip()
+                if text.startswith("```"):
+                    text = text.split("```")[1]
+                    if text.startswith("json"):
+                        text = text[4:]
+                text = text.strip()
+                parsed = json.loads(text)
+            except Exception:
+                pass
+                
+    # Normalize results
+    results = []
+    if isinstance(parsed, dict):
+        for key, val in parsed.items():
+            if isinstance(val, list):
+                parsed = val
+                break
+                
+    if not isinstance(parsed, list):
+        parsed = []
+        
+    for item in parsed:
+        c_id = item.get("candidate_id")
+        score = item.get("score", 5.0)
         try:
-            cleaned = response.text.strip()
-            if cleaned.startswith("```json"):
-                cleaned = cleaned[7:]
-            if cleaned.endswith("```"):
-                cleaned = cleaned[:-3]
-            data = json.loads(cleaned.strip())
-            return data
-        except Exception:
-            pass
+            score = float(score)
+            score = max(0.0, min(10.0, score))
+        except (ValueError, TypeError):
+            score = 5.0
             
-        return []
+        results.append({
+            "candidate_id": c_id,
+            "score": score,
+            "reasoning": item.get("reasoning") or "Evaluated by AI recruiter.",
+            "interview_questions": item.get("interview_questions") if isinstance(item.get("interview_questions"), list) else ["Tell me about your experience."]
+        })
+        
+    return results

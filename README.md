@@ -1,55 +1,65 @@
-# HireFlow - Full-Stack AI Hiring Agent App
+# HireFlow - Agent-First AI Recruiter App
 
-HireFlow is an AI-powered applicant tracking and resume evaluation platform. It parses resumes, structures the candidate data using Gemini, embeds the records using Vertex AI Text Embeddings, saves them into a MongoDB Atlas database, matches candidates with job requirements via Vector Search, ranks them, and renders results inside a React Kanban Board.
+HireFlow is an AI-powered applicant parsing, evaluation, and ranking platform built for small businesses. Rather than forcing recruiters to navigate complex dashboards, HireFlow is designed **agent-first**: a conversational assistant serves as the primary interface, while a reactive Kanban board updates dynamically in the background to show hiring progression.
 
 ---
 
-## Architecture Diagram (ASCII)
+## The Mission
+Traditional applicant tracking systems are tedious, rigid, and require manual data entry. HireFlow's mission is to make hiring as simple as having a conversation. 
+1. The recruiter tells the agent what role they are hiring for (e.g. *"I need a Senior React developer"*).
+2. The recruiter attaches resumes directly inside the chat.
+3. The agent initiates the parsing, embedding, and matching pipeline, populating and moving candidates on the Kanban board in real time.
+4. The recruiter asks questions, moves candidates, and gathers AI-generated interview queries conversationally.
+
+---
+
+## System Architecture
 
 ```text
-+-------------------------------------------------------+
-|                    React Frontend                     |
-|            (UploadPanel / Kanban / Stepper)           |
-+---------------------------+---------------------------+
-                            |
-                     (HTTP / REST APIs)
-                            v
-+-------------------------------------------------------+
-|                    FastAPI Backend                    |
-|    (main.py / pipeline.py / pdf_parser.py / CORS)     |
-+-----+---------------------+---------------------+-----+
-      |                     |                     |
-      | (Vertex AI SDK)     | (Vertex AI SDK)     | (PyMongo Client)
-      v                     v                     v
-+-----------+         +-----------+         +-----------+
-| Gemini    |         | Vertex AI |         | MongoDB   |
-| 2.0 Flash |         | text-     |         | Atlas     |
-| (Rank &   |         | embedding-|         | (Resumes  |
-| Structure)|         | 004)      |         | / Vector) |
-+-----------+         +-----------+         +-----------+
++-------------------------------------------------------------+
+|                       React Frontend                        |
+|        (Split Screen: 35% Kanban Board | 65% Agent Chat)     |
++------------------------------+------------------------------+
+                               |
+                        (HTTP / REST APIs)
+                               v
++-------------------------------------------------------------+
+|                       FastAPI Backend                       |
+|   (routes/chat.py / services/pipeline.py / pdf_parser.py)   |
++--------+---------------------+---------------------+--------+
+         |                     |                     |
+         | (Google GenAI SDK)  | (Vertex AI SDK)     | (PyMongo Client)
+         v                     v                     v
+   +-----------+         +-----------+         +-----------+
+   | Gemini    |         | Vertex AI |         | MongoDB   |
+   | 2.5 Flash |         | text-     |         | Atlas     |
+   | (Chat &   |         | embedding-|         | (Resumes  |
+   | Recruiter)|         | 004)      |         | / Vector) |
+   +-----------+         +-----------+         +-----------+
 ```
 
 ---
 
 ## Tech Stack
 
-- **Large Language Model**: Gemini 2.0 Flash (via Vertex AI SDK)
-- **Embeddings**: Vertex AI `text-embedding-004`
+- **Conversational Engine**: Gemini 2.5 Flash (via Google GenerativeAI Python SDK with API Key)
+- **Embeddings Model**: Vertex AI `text-embedding-004` (for vector embeddings)
 - **Vector Database**: MongoDB Atlas (Vector Search using `$vectorSearch` and index `"resume_vector_index"`)
+- **Backend Framework**: FastAPI + Uvicorn (Python)
+- **PDF Parser**: PyMuPDF
+- **Frontend Client**: React (Vite) + Tailwind CSS
 - **Container Infrastructure**: Google Cloud Run & Google Cloud Build
-- **Cloud Orchestration**: Google Cloud Agent Builder
-- **Backend**: FastAPI + Python (PyMuPDF parser)
-- **Frontend**: React (Vite) + Tailwind CSS v4
 
 ---
 
-## Setup Instructions
+## Local Setup Instructions
 
 ### Prerequisites
 - Python 3.11 or later
 - Node.js v18 or later and npm
 - A MongoDB Atlas Cluster (with Vector Search enabled)
 - A Google Cloud Platform (GCP) project with Vertex AI APIs enabled
+- A Gemini API Key (obtain from Google AI Studio)
 
 ### 1. Local Backend Setup
 1. Navigate to the backend directory:
@@ -62,13 +72,14 @@ HireFlow is an AI-powered applicant tracking and resume evaluation platform. It 
    source venv/bin/activate
    pip install -r requirements.txt
    ```
-3. Setup your `.env` variables (use `.env.template` as a guide):
+3. Create a `.env` file (use `.env.template` as a guide) and populate your credentials:
    ```env
    MONGODB_URI=your_mongodb_atlas_uri
    GOOGLE_CLOUD_PROJECT=your_gcp_project_id
    GOOGLE_CLOUD_LOCATION=us-central1
+   GEMINI_API_KEY=your_gemini_api_key
    ```
-4. Authenticate your terminal with Google Cloud:
+4. Authenticate your terminal with Google Cloud (needed for Vertex Embeddings):
    ```bash
    gcloud auth application-default login
    ```
@@ -90,34 +101,22 @@ HireFlow is an AI-powered applicant tracking and resume evaluation platform. It 
    ```bash
    npm run dev
    ```
-4. Open the browser to the local Vite URL (typically `http://localhost:5173`).
+4. Open your browser and navigate to `http://localhost:5173`.
 
 ---
 
-## Deployment to Google Cloud
+## Deployment
 
-### Manual Container Deployment (Backend)
-To manually deploy the FastAPI backend container to Google Cloud Run, execute the following commands in your terminal:
+### Container Deployment to Google Cloud Run (Backend)
 
-1. Build the container image in Google Cloud Build:
-   ```bash
-   gcloud builds submit --tag gcr.io/$PROJECT_ID/hireflow-backend ./backend
-   ```
-2. Deploy the container to Google Cloud Run:
-   ```bash
-   gcloud run deploy hireflow-backend \
-     --image gcr.io/$PROJECT_ID/hireflow-backend \
-     --platform managed \
-     --region us-central1 \
-     --allow-unauthenticated \
-     --set-env-vars MONGODB_URI=$MONGODB_URI,GOOGLE_CLOUD_PROJECT=$PROJECT_ID
-   ```
+We deploy our backend to Cloud Run using Google Cloud Build. Execute the deployment by setting the required variables:
 
-Alternatively, you can automate this by setting your environment variables and running our convenience script:
 ```bash
 chmod +x deploy.sh
-PROJECT_ID="your-project-id" MONGODB_URI="your-mongo-uri" ./deploy.sh
+PROJECT_ID="your-project-id" MONGODB_URI="your-mongo-uri" GEMINI_API_KEY="your-gemini-api-key" ./deploy.sh
 ```
+
+The script will automatically build your container image via Google Cloud Build and deploy it to Google Cloud Run with the correct environment variables bound.
 
 ### Static Build Deployment (Frontend)
 1. Add your deployed backend Cloud Run URL to `frontend/.env.production`:
@@ -129,31 +128,32 @@ PROJECT_ID="your-project-id" MONGODB_URI="your-mongo-uri" ./deploy.sh
    cd frontend
    npm run build
    ```
-3. Deploy the resulting `frontend/dist` directory to your static hosting provider (e.g. Firebase Hosting, Cloud Storage, Vercel, or Netlify).
+3. Deploy the resulting `frontend/dist` directory to your static hosting provider (Vercel, Firebase Hosting, Netlify, etc.).
 
 ---
 
-## 🚀 Hackathon Demo Guide (How to Test & Present)
+## 🚀 Hackathon Demo Guide (How to Present)
 
-Follow these steps to demonstrate the full end-to-end capabilities of HireFlow to judges:
+Follow these steps to demonstrate the full end-to-end capabilities of HireFlow:
 
-### Phase 1: Visual Screening (React Web App)
-1. **Open the web client**: Go to [https://frontend-gold-one-34.vercel.app](https://frontend-gold-one-34.vercel.app).
-2. **Review Connection Status**: Verify the top-right indicator reads **Atlas DB: Connected** (showing live connection to MongoDB Atlas from anywhere).
-3. **Configure the Campaign**:
-   - Paste a job description (e.g., *Software Engineer requirements: React, Node.js, MongoDB*) into the **Job Description** textarea.
-   - Upload candidate resumes (PDFs) in the **Resumes** area.
-4. **Run the Stepper**: Click **Submit Campaign**. Watch the stepper trigger the 5 main stages in real-time with custom pulsing radar animations.
-5. **Explore Kanban Results**:
-   - Observe candidate cards sorted by their match scores.
-   - Click a card to expand candidate **Insights** (reasons to hire, custom interview questions) with smooth arrow rotation transitions.
-   - Move/update a candidate's column status by dragging them or using the dropdown selector, updating their status dynamically in the database.
+### Phase 1: Conversational Pipeline Setup
+1. **Open the web app**: Go to the client URL.
+2. **Review Connection Status**: Verify the top-right indicator reads **Atlas DB: Connected**.
+3. **Engage the Agent**:
+   - In the chat panel on the right, type: *"I need to hire a Full Stack React developer."*
+   - The agent will greet you and prompt you to upload candidate resumes.
+4. **Upload Resumes**:
+   - Click the paperclip attachment button in the chat input.
+   - Select multiple PDF resumes and click send.
+5. **Watch the Magic Happen**:
+   - The agent uploads the files, triggers the parsing pipeline, and reports back that evaluation has started.
+   - On the left pane, watch the Kanban board automatically update in real-time (polling every 5 seconds) as candidates are ranked and moved to their matched stages.
 
-### Phase 2: Conversational Evaluation (Google ADK AI Agent)
-1. **Launch the Agent Interface**: Click the floating **"Ask HireFlow AI"** button in the bottom right corner of the React Web App. A sliding drawer will open directly on your screen containing the conversational recruiter chatbot interface.
-2. **Trigger Conversational Audit**: Chat with the agent by entering:
-   - *Example Prompt*: `Analyze candidates for job ID <job_id>` (Copy the Job ID from the header of the Kanban results page in the web app).
-3. **Watch Tool Orchestration**: Observe the agent automatically invoke its ADK tools (`run_hiring_pipeline`, `get_pipeline_status`, and `get_ranked_candidates`) to analyze database profiles.
-4. **Review Suggestions**: The agent will reply with candidate rankings, hiring recommendations, strengths/weaknesses, and top 3 personalized questions.
-
-
+### Phase 2: Candidate Deep-Dive & Control
+1. **Review Match Summaries**: The agent will respond conversationally in the chat with a ranked summary of the top matching candidates.
+2. **Interactive Insights**:
+   - Click any card on the Kanban board.
+   - Inspect the candidate's custom matching score, specific reasons to hire, and tailored interview questions.
+3. **Conversational Controls**:
+   - Chat with the agent to perform actions. For example, type: *"What are the weaknesses of candidate [Name]?"* or *"Generate interview questions for [Name]"*.
+   - You can even move candidates conversationally: *"Move [Name] to Rejected."* The Kanban board updates instantly!
