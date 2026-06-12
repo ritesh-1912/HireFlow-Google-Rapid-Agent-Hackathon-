@@ -1,3 +1,6 @@
+🔗 Live Demo: https://frontend-gold-one-34.vercel.app
+📦 Track: MongoDB | Google Cloud Rapid Agent Hackathon 2026
+
 # HireFlow - Agent-First AI Recruiter App
 
 HireFlow is an AI-powered applicant parsing, evaluation, and ranking platform built for small businesses. Rather than forcing recruiters to navigate complex dashboards, HireFlow is designed **agent-first**: a conversational assistant serves as the primary interface, while a reactive Kanban board updates dynamically in the background to show hiring progression.
@@ -32,7 +35,7 @@ Traditional applicant tracking systems are tedious, rigid, and require manual da
          v                     v                     v
    +-----------+         +-----------+         +-----------+
    | Gemini    |         | Vertex AI |         | MongoDB   |
-   | 2.5 Flash |         | text-     |         | Atlas     |
+   | 1.5 Flash |         | text-     |         | Atlas     |
    | (Chat &   |         | embedding-|         | (Resumes  |
    | Recruiter)|         | 004)      |         | / Vector) |
    +-----------+         +-----------+         +-----------+
@@ -42,7 +45,7 @@ Traditional applicant tracking systems are tedious, rigid, and require manual da
 
 ## Tech Stack
 
-- **Conversational Engine**: Gemini 2.5 Flash (via Google GenerativeAI Python SDK with API Key)
+- **Conversational Engine**: Gemini 1.5 Flash (via Google GenerativeAI Python SDK with API Key)
 - **Embeddings Model**: Vertex AI `text-embedding-004` (for vector embeddings)
 - **Vector Database**: MongoDB Atlas (Vector Search using `$vectorSearch` and index `"resume_vector_index"`)
 - **Backend Framework**: FastAPI + Uvicorn (Python)
