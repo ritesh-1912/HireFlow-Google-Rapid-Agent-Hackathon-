@@ -1,14 +1,18 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional, List
-import google.generativeai as genai
+import vertexai
+from vertexai.generative_models import GenerativeModel
 import os
 from services.mongodb import get_db
 import json
 
 router = APIRouter()
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+vertexai.init(
+    project=os.getenv("GOOGLE_CLOUD_PROJECT"),
+    location=os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
+)
 
 class ChatMessage(BaseModel):
     role: str
@@ -61,8 +65,8 @@ decisively. When listing candidates, use this format:
 
 Tell the user exactly who to hire and why. Be concise."""
 
-        model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash",
+        model = GenerativeModel(
+            "gemini-1.5-flash",
             system_instruction=system_prompt
         )
 
