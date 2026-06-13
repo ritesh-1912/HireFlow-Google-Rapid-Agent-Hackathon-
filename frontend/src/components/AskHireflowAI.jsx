@@ -106,7 +106,6 @@ export default function AskHireflowAI({ jobId, setJobId, triggerKanbanRefresh })
         text: msg.text
       }));
 
-      const userMessage = finalUserText;
       const currentJobId = activeJobId;
       const conversationHistory = sessionHistory;
 
@@ -116,7 +115,7 @@ export default function AskHireflowAI({ jobId, setJobId, triggerKanbanRefresh })
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            message: userMessage,
+            message: finalUserText,
             job_id: currentJobId || null,
             history: conversationHistory || []
           })
