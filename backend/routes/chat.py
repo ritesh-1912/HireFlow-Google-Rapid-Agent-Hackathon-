@@ -66,7 +66,7 @@ decisively. When listing candidates, use this format:
 Tell the user exactly who to hire and why. Be concise."""
 
         model = GenerativeModel(
-            "gemini-1.5-flash",
+            "gemini-2.5-flash",
             system_instruction=system_prompt
         )
 

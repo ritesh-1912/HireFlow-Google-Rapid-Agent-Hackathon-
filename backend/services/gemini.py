@@ -17,7 +17,7 @@ else:
     print("Warning: GOOGLE_CLOUD_PROJECT is not set. Vertex AI initialization skipped in gemini.py.")
 
 def get_gemini_model():
-    return GenerativeModel("gemini-1.5-flash")
+    return GenerativeModel("gemini-2.5-flash")
 
 def structure_resume(raw_text: str) -> dict:
     """
