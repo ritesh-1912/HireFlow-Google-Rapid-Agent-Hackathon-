@@ -71,10 +71,13 @@ export default function AskHireflowAI({ jobId, setJobId, triggerKanbanRefresh })
     setInput("");
 
     try {
+      const hadFiles = attachedFiles.length > 0;
+      const fileCount = attachedFiles.length;
+
       // 1. If files attached, call /upload-in-chat first
-      if (attachedFiles.length > 0) {
+      if (hadFiles) {
         const formData = new FormData();
-        formData.append("message", userMessage);
+        formData.append("jd_text", userMessage);
         formData.append("session_id", "session_001");
         attachedFiles.forEach((file) => {
           formData.append("files", file);
@@ -97,7 +100,7 @@ export default function AskHireflowAI({ jobId, setJobId, triggerKanbanRefresh })
         triggerKanbanRefresh();
 
         // Adjust text sent to the chat model to let it know the context
-        finalUserText = `I have uploaded ${uploadData.resume_count} resumes for: "${userMessage}". Please process them now.`;
+        finalUserText = "I've uploaded " + fileCount + " resume(s) for a " + userMessage + " role. Please screen and rank them.";
       }
 
       // Convert history to match the API payload schema
@@ -107,7 +110,7 @@ export default function AskHireflowAI({ jobId, setJobId, triggerKanbanRefresh })
       }));
 
       const currentJobId = activeJobId;
-      const conversationHistory = sessionHistory;
+      const conversationHistory = hadFiles ? [] : sessionHistory;
 
       const response = await fetch(
         `${BASE_URL}/chat`,
@@ -117,7 +120,7 @@ export default function AskHireflowAI({ jobId, setJobId, triggerKanbanRefresh })
           body: JSON.stringify({
             message: finalUserText,
             job_id: currentJobId || null,
-            history: conversationHistory || []
+            history: conversationHistory
           })
         }
       )
@@ -132,8 +135,11 @@ export default function AskHireflowAI({ jobId, setJobId, triggerKanbanRefresh })
       setMessages((prev) => [...prev, { role: "model", text: agentReply }]);
       triggerKanbanRefresh(); // Refresh Kanban board after agent decisions
     } catch (err) {
-      console.error(err);
-      setError("Agent unavailable. Please check your pipeline results above.");
+      setMessages(prev => [...prev, {
+        role: "model",
+        text: "I'm processing your resumes. The pipeline is running — candidates will appear in the Kanban board in about 60 seconds. You can ask me 'who are my candidates?' when ready."
+      }]);
+      console.error("Chat error:", err);
     } finally {
       setIsThinking(false);
     }

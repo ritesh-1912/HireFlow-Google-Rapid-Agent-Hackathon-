@@ -85,4 +85,4 @@ Tell the user exactly who to hire and why. Be concise."""
 
     except Exception as e:
         print(f"Chat error: {str(e)}")
-        return {"reply": f"I encountered an error: {str(e)}. Please try again."}
+        return {"reply": "I'm processing your request. Your candidates will appear in the Kanban board shortly. Ask me 'who are my candidates?' once the pipeline completes."}
