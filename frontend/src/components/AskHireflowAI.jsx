@@ -111,7 +111,7 @@ export default function AskHireflowAI({ jobId, setJobId, triggerKanbanRefresh })
       const conversationHistory = sessionHistory;
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/chat`,
+        `${BASE_URL}/chat`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
