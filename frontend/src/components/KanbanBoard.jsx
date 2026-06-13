@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import CandidateCard from "./CandidateCard";
 import { UserCheck, Users, UserX, Loader2 } from "lucide-react";
 
-export default function KanbanBoard({ jobId, compact = false }) {
+export default function KanbanBoard({ jobId, compact = false, refreshTrigger }) {
   const [candidates, setCandidates] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -33,9 +33,9 @@ export default function KanbanBoard({ jobId, compact = false }) {
     },
   ];
 
-  const fetchCandidates = async () => {
+  const fetchCandidates = async (isInitial = false) => {
     if (!jobId) return;
-    setIsLoading(true);
+    if (isInitial) setInitialLoading(true);
     setError(null);
     try {
       const response = await fetch(`${BASE_URL}/candidates?job_id=${jobId}`);
@@ -43,16 +43,26 @@ export default function KanbanBoard({ jobId, compact = false }) {
       const data = await response.json();
       setCandidates(data);
     } catch (err) {
-      console.error("Error loading candidates:", err);
+      console.error("Poll error:", err);
       setError(err.message || "Could not retrieve candidate data.");
     } finally {
-      setIsLoading(false);
+      if (isInitial) setInitialLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCandidates();
+    fetchCandidates(true); // first load shows spinner
+    const interval = setInterval(() => {
+      fetchCandidates(false); // subsequent polls are silent
+    }, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
   }, [jobId]);
+
+  useEffect(() => {
+    if (refreshTrigger) {
+      fetchCandidates(false); // silent refresh on manual trigger
+    }
+  }, [refreshTrigger]);
 
   const handleMove = async (candidateId, newStatus) => {
     // Optimistic Update for UI responsiveness
@@ -81,7 +91,7 @@ export default function KanbanBoard({ jobId, compact = false }) {
     return candidates.filter((c) => c.status === statusId);
   };
 
-  if (isLoading) {
+  if (initialLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[200px]">
         <Loader2 className="w-6 h-6 animate-spin text-zinc-400 mb-2" />
@@ -105,15 +115,9 @@ export default function KanbanBoard({ jobId, compact = false }) {
       )}
 
       {candidates.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[250px] border border-dashed border-[#2e2e2e] rounded-xl p-6 bg-[#121212] text-center w-full animate-in fade-in duration-300">
-          <div className="w-12 h-12 rounded-full bg-[#1c1c1c] border border-[#2e2e2e] flex items-center justify-center text-zinc-500 mb-3 shadow-inner">
-            <Users className="w-6 h-6" />
-          </div>
-          <h3 className="text-xs font-bold text-white mb-1">No candidates found</h3>
-          <p className="text-xs text-zinc-500">
-            Tell the AI agent who you're hiring for and upload resumes in the chat.
-          </p>
-        </div>
+        <p style={{color: "#666", textAlign: "center", padding: "20px"}}>
+          No candidates yet. Upload resumes to get started.
+        </p>
       ) : (
         <div className={compact ? "flex flex-col gap-4" : "grid grid-cols-1 md:grid-cols-3 gap-6"}>
           {columns.map((col) => {

@@ -39,14 +39,7 @@ export default function App() {
     checkActiveJob();
   }, []);
 
-  // Auto-refresh Kanban board every 5 seconds if jobId is active
-  useEffect(() => {
-    if (!jobId) return;
-    const interval = setInterval(() => {
-      triggerKanbanRefresh();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [jobId]);
+
 
   return (
     <div className="min-h-screen h-screen bg-[#0f0f0f] text-white font-sans selection:bg-zinc-800 selection:text-white flex flex-col overflow-hidden">
@@ -95,7 +88,7 @@ export default function App() {
           </div>
           <div className="flex-1 overflow-y-auto p-4 min-h-0">
             {jobId ? (
-              <KanbanBoard jobId={jobId} compact={true} key={refreshTrigger} />
+              <KanbanBoard jobId={jobId} compact={true} refreshTrigger={refreshTrigger} />
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center p-6 text-zinc-500 text-sm">
                 <Layers className="w-8 h-8 mb-2 opacity-30 text-zinc-400" />
