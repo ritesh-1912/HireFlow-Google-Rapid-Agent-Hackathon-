@@ -29,23 +29,23 @@ Traditional applicant tracking systems are tedious, rigid, and require manual da
 +-------------------------------------------------------------+
 |                       FastAPI Backend                       |
 |   (routes/chat.py / services/pipeline.py / pdf_parser.py)   |
-+--------+---------------------+---------------------+--------+
-         |                     |                     |
-         | (Google GenAI SDK)  | (Vertex AI SDK)     | (PyMongo Client)
-         v                     v                     v
-   +-----------+         +-----------+         +-----------+
-   | Gemini    |         | Vertex AI |         | MongoDB   |
-   | 1.5 Flash |         | text-     |         | Atlas     |
-   | (Chat &   |         | embedding-|         | (Resumes  |
-   | Recruiter)|         | 004)      |         | / Vector) |
-   +-----------+         +-----------+         +-----------+
++----------------------+------------------------------+-------+
+                       |                              |
+                       | (Vertex AI SDK)              | (PyMongo Client)
+                       v                              v
+           +-----------------------+            +-----------+
+           | Vertex AI             |            | MongoDB   |
+           | - gemini-2.5-flash    |            | Atlas     |
+           | - text-embedding-004  |            | (Resumes  |
+           +-----------------------+            | / Vector) |
+                                                +-----------+
 ```
 
 ---
 
 ## Tech Stack
 
-- **Conversational Engine**: Gemini 1.5 Flash (via Google GenerativeAI Python SDK with API Key)
+- **Conversational Engine**: Gemini 2.5 Flash (via Vertex AI SDK using Google Cloud credits)
 - **Embeddings Model**: Vertex AI `text-embedding-004` (for vector embeddings)
 - **Vector Database**: MongoDB Atlas (Vector Search using `$vectorSearch` and index `"resume_vector_index"`)
 - **Backend Framework**: FastAPI + Uvicorn (Python)
@@ -62,7 +62,6 @@ Traditional applicant tracking systems are tedious, rigid, and require manual da
 - Node.js v18 or later and npm
 - A MongoDB Atlas Cluster (with Vector Search enabled)
 - A Google Cloud Platform (GCP) project with Vertex AI APIs enabled
-- A Gemini API Key (obtain from Google AI Studio)
 
 ### 1. Local Backend Setup
 1. Navigate to the backend directory:
@@ -80,9 +79,8 @@ Traditional applicant tracking systems are tedious, rigid, and require manual da
    MONGODB_URI=your_mongodb_atlas_uri
    GOOGLE_CLOUD_PROJECT=your_gcp_project_id
    GOOGLE_CLOUD_LOCATION=us-central1
-   GEMINI_API_KEY=your_gemini_api_key
    ```
-4. Authenticate your terminal with Google Cloud (needed for Vertex Embeddings):
+4. Authenticate your terminal with Google Cloud:
    ```bash
    gcloud auth application-default login
    ```
@@ -116,7 +114,7 @@ We deploy our backend to Cloud Run using Google Cloud Build. Execute the deploym
 
 ```bash
 chmod +x deploy.sh
-PROJECT_ID="your-project-id" MONGODB_URI="your-mongo-uri" GEMINI_API_KEY="your-gemini-api-key" ./deploy.sh
+PROJECT_ID="your-project-id" MONGODB_URI="your-mongo-uri" ./deploy.sh
 ```
 
 The script will automatically build your container image via Google Cloud Build and deploy it to Google Cloud Run with the correct environment variables bound.
