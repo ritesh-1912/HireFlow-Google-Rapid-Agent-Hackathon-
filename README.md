@@ -1,5 +1,5 @@
 🔗 Live Demo: https://frontend-gold-one-34.vercel.app
-📦 Track: MongoDB | Google Cloud Rapid Agent Hackathon 2026
+📦 Track: MongoDB | Google Cloud Rapid Agent Hackathon 2026 organized by Devpost
 
 # HireFlow - Agent-First AI Recruiter App
 
